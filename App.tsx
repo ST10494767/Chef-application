@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, Pressable, ImageBackground, TextInput, FlatList, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Define MenuItem interface
+// Give the menu item type
 interface MenuItem {
   name: string;
   description: string;
@@ -17,14 +17,10 @@ function HomeScreen({ navigation }: any) {
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [price, setPrice] = useState<string>("");
-  const [items, setItems] = useState<MenuItem[]>([
-    { name: "Moules marinière", description: "Mussels in white wine sauce", category: "Starter", price: "R65.00" },
-    { name: "Butter Chicken", description: "Rich and creamy Indian curry", category: "Main", price: "R120.00" },
-    { name: "Chocolate Mousse", description: "Rich dark chocolate", category: "Dessert", price: "R80.00" },
-  ]);
+  const [items, setItems] = useState<MenuItem[]>([]); 
   const [validationMsg, setValidationMsg] = useState<string>("");
 
-  // editing state: index of item being edited, or null
+  
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -36,14 +32,6 @@ function HomeScreen({ navigation }: any) {
     ]).start();
   };
 
-  const formatPrice = (p: string) => {
-    const cleaned = p.replace(/[^\d.]/g, "");
-    const num = parseFloat(cleaned);
-    if (isNaN(num)) return "";
-    return `R${num.toFixed(2)}`;
-  };
-
-  // add or save edits
   const handleAddItem = (): boolean => {
     if (!name.trim()) {
       setValidationMsg("Please enter a name");
@@ -61,7 +49,7 @@ function HomeScreen({ navigation }: any) {
     }
     const formatted = `R${num.toFixed(2)}`;
     if (editingIndex !== null && editingIndex >= 0 && editingIndex < items.length) {
-      // update existing
+      
       const updated = [...items];
       updated[editingIndex] = { name: name.trim(), description: description.trim(), category, price: formatted };
       setItems(updated);
@@ -93,7 +81,7 @@ function HomeScreen({ navigation }: any) {
       setPrice("");
       setValidationMsg("");
     } else if (editingIndex !== null && editingIndex > index) {
-      // shift editing index down if an earlier item was removed
+      
       setEditingIndex(editingIndex - 1);
     }
   };
@@ -103,7 +91,6 @@ function HomeScreen({ navigation }: any) {
     setName(it.name);
     setDescription(it.description);
     setCategory(it.category);
-    // populate input price without currency symbol
     setPrice(it.price.replace(/[^\d.]/g, ""));
     setEditingIndex(index);
     setValidationMsg("");
@@ -114,36 +101,78 @@ function HomeScreen({ navigation }: any) {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <SafeAreaView style={{ width: "90%" }}>
           <View style={{ backgroundColor: "rgba(255,255,255,0.9)", padding: 16, borderRadius: 8, marginBottom: 16 }}>
-            <Text style={{ color: "#000000ff", marginBottom: 8 }}>{editingIndex !== null ? "Edit Food Item:" : "Enter Food Name:"}</Text>
-            <TextInput style={{ borderWidth: 1, borderColor: "#ccc", marginBottom: 8, padding: 8, borderRadius: 4 }} value={name} onChangeText={setName} placeholder="Food Name" />
+            <Text style={{ color: "#000000ff", marginBottom: 8 }}>
+              {editingIndex !== null ? "Edit Food Item:" : "Enter Food Name:"}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Food Name"
+            />
             <Text style={{ color: "#000000ff", marginBottom: 8 }}>Enter Description:</Text>
-            <TextInput style={{ borderWidth: 1, borderColor: "#ccc", marginBottom: 8, padding: 8, borderRadius: 4 }} value={description} onChangeText={setDescription} placeholder="Description" />
+            <TextInput
+              style={styles.input}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Description"
+            />
             <Text style={{ color: "#000000ff", marginBottom: 8 }}>Select Food Category:</Text>
             <View style={{ flexDirection: "row", marginBottom: 8 }}>
               {COURSE_CATEGORIES.map((cat) => (
-                <Pressable key={cat} onPress={() => setCategory(cat)} style={{
-                  paddingVertical: 6, paddingHorizontal: 16, borderRadius: 16,
-                  backgroundColor: category === cat ? "#108700ff" : "#e0e0e0", marginRight: 8,
-                  borderWidth: category === cat ? 2 : 1, borderColor: category === cat ? "#108700ff" : "#ccc",
-                }}>
-                  <Text style={{ color: category === cat ? "#fff" : "#333", fontWeight: category === cat ? "700" : "400" }}>{cat}</Text>
+                <Pressable
+                  key={cat}
+                  onPress={() => setCategory(cat)}
+                  style={[
+                    styles.categoryButton,
+                    {
+                      backgroundColor: category === cat ? "#108700ff" : "#e0e0e0",
+                      borderColor: category === cat ? "#108700ff" : "#ccc",
+                      borderWidth: category === cat ? 2 : 1,
+                    },
+                  ]}
+                >
+                  <Text style={{ color: category === cat ? "#fff" : "#333", fontWeight: category === cat ? "700" : "400" }}>
+                    {cat}
+                  </Text>
                 </Pressable>
               ))}
             </View>
             <Text style={{ color: "#000000ff" }}>Enter Price:</Text>
-            <TextInput style={{ borderWidth: 1, borderColor: "#ccc", marginBottom: 8, padding: 8, borderRadius: 4 }} value={price} onChangeText={setPrice} placeholder="Price (e.g., 12.50)" keyboardType="numeric" />
+            <TextInput
+              style={styles.input}
+              value={price}
+              onChangeText={setPrice}
+              placeholder="Price (e.g., 12.50)"
+              keyboardType="numeric"
+            />
 
             <Animated.View style={{ transform: [{ scale }] }}>
-              <Pressable style={{ backgroundColor: "#108700ff", paddingVertical: 12, borderRadius: 8, marginTop: 8 }} onPress={() => { const ok = handleAddItem(); if (ok) animatePop(); }}>
-                <Text style={{ textAlign: "center", color: "#000000ff", fontWeight: "700", }}>{editingIndex !== null ? "Save" : "Add to Menu"}</Text>
+              <Pressable
+                style={styles.addButton}
+                onPress={() => {
+                  const ok = handleAddItem();
+                  if (ok) animatePop();
+                }}
+              >
+                <Text style={styles.addButtonText}>
+                  {editingIndex !== null ? "Save" : "Add to Menu"}
+                </Text>
               </Pressable>
             </Animated.View>
 
-            <Pressable style={{ marginTop: 8, padding: 10 }} onPress={() => navigation.navigate('Menu', { items })}>
-              <Text style={{ color: "#108700ff", textAlign: "center", fontWeight: "600" }}>View Menu (second page)</Text>
+            <Pressable
+              style={{ marginTop: 8, padding: 10 }}
+              onPress={() => navigation.navigate('Menu', { items })}
+            >
+              <Text style={{ color: "#108700ff", textAlign: "center", fontWeight: "600" }}>
+                View Menu (second page)
+              </Text>
             </Pressable>
 
-            {validationMsg ? (<Text style={{ color: "red", textAlign: "center", marginTop: 8 }}>{validationMsg}</Text>) : null}
+            {validationMsg ? (
+              <Text style={{ color: "red", textAlign: "center", marginTop: 8 }}>{validationMsg}</Text>
+            ) : null}
           </View>
 
           <View style={{ alignItems: "center", marginBottom: 8 }}>
@@ -151,26 +180,34 @@ function HomeScreen({ navigation }: any) {
           </View>
 
           <View style={{ backgroundColor: "rgba(255,255,255,0.9)", padding: 10, borderRadius: 8, minHeight: 40 }}>
-            {items.length === 0 ? (<Text style={{ color: "#000000ff" }}>All Cuisines will appear here</Text>) : (
-              <FlatList data={items} keyExtractor={(_, idx) => idx.toString()} renderItem={({ item, index }) => (
-                <View style={{ marginBottom: 8 }}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontWeight: "bold", color: "#108700ff" }}>{item.name} ({item.category})</Text>
-                      <Text style={{ color: "#000" }}>{item.description}</Text>
-                      <Text style={{ color: "#000" }}>{item.price}</Text>
-                    </View>
-                    <View style={{ flexDirection: "row", marginLeft: 8 }}>
-                      <Pressable onPress={() => handleEdit(index)} style={{ padding: 6, backgroundColor: "#ffeaa7", borderRadius: 6, marginRight: 6 }}>
-                        <Text>Edit</Text>
-                      </Pressable>
-                      <Pressable onPress={() => handleDelete(index)} style={{ padding: 6, backgroundColor: "#ff7675", borderRadius: 6 }}>
-                        <Text>Delete</Text>
-                      </Pressable>
+            {items.length === 0 ? (
+              <Text style={{ color: "#000000ff" }}>All Cuisines will appear here</Text>
+            ) : (
+              <FlatList
+                data={items}
+                keyExtractor={(_, idx) => idx.toString()}
+                renderItem={({ item, index }) => (
+                  <View style={{ marginBottom: 8 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontWeight: "bold", color: "#108700ff" }}>
+                          {item.name} ({item.category})
+                        </Text>
+                        <Text style={{ color: "#000" }}>{item.description}</Text>
+                        <Text style={{ color: "#000" }}>{item.price}</Text>
+                      </View>
+                      <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                        <Pressable onPress={() => handleEdit(index)} style={styles.editButton}>
+                          <Text>Edit</Text>
+                        </Pressable>
+                        <Pressable onPress={() => handleDelete(index)} style={styles.deleteButton}>
+                          <Text>Delete</Text>
+                        </Pressable>
+                      </View>
                     </View>
                   </View>
-                </View>
-              )} />
+                )}
+              />
             )}
           </View>
         </SafeAreaView>
@@ -184,13 +221,18 @@ function MenuScreen({ route, navigation }: any) {
   return (
     <SafeAreaView style={{ flex: 1, padding: 16 }}>
       <Text style={{ fontSize: 18, fontWeight: "700", marginBottom: 12 }}>Menu (second page)</Text>
-      <FlatList data={items} keyExtractor={(_, idx) => idx.toString()} renderItem={({ item }) => (
-        <View style={{ marginBottom: 12, padding: 8, backgroundColor: "#fff", borderRadius: 6 }}>
-          <Text style={{ fontWeight: "700" }}>{item.name} — {item.price}</Text>
-          <Text style={{ color: "#444" }}>{item.category}</Text>
-          <Text style={{ color: "#333" }}>{item.description}</Text>
-        </View>
-      )} ListEmptyComponent={<Text>No items yet</Text>} />
+      <FlatList
+        data={items}
+        keyExtractor={(_, idx) => idx.toString()}
+        renderItem={({ item }) => (
+          <View style={{ marginBottom: 12, padding: 8, backgroundColor: "#fff", borderRadius: 6 }}>
+            <Text style={{ fontWeight: "700" }}>{item.name} — {item.price}</Text>
+            <Text style={{ color: "#444" }}>{item.category}</Text>
+            <Text style={{ color: "#333" }}>{item.description}</Text>
+          </View>
+        )}
+        ListEmptyComponent={<Text>No items yet</Text>}
+      />
       <Pressable style={{ marginTop: 12 }} onPress={() => navigation.goBack()}>
         <Text style={{ color: "#108700ff" }}>Back</Text>
       </Pressable>
@@ -220,6 +262,40 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  // ...existing styles...
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 8,
+    padding: 8,
+    borderRadius: 4,
+  },
+  categoryButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  addButton: {
+    backgroundColor: "#108700ff",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  addButtonText: {
+    textAlign: "center",
+    color: "#000000ff",
+    fontWeight: "700",
+  },
+  editButton: {
+    padding: 6,
+    backgroundColor: "#ffeaa7",
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  deleteButton: {
+    padding: 6,
+    backgroundColor: "#ff7675",
+    borderRadius: 6,
+  },
 });
 
