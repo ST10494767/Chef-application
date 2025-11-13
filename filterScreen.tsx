@@ -43,7 +43,7 @@ export default function FilterScreen({ menuItems }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
+  container: { flex: 1, padding: 16, backgroundColor: '#00ff15ff'  },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
   buttons: { gap: 6, marginBottom: 12 },
   item: { marginVertical: 4 },

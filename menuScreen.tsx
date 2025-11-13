@@ -89,7 +89,7 @@ export default function ManageMenuScreen({
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
+  container: { flex: 1, padding: 16, backgroundColor: '#00fd15ff' },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
   subtitle: { fontWeight: 'bold', marginVertical: 10 },
   input: {
